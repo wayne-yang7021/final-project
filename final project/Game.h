@@ -1,8 +1,9 @@
 #pragma once
 #include <SDL.h>
 #include <SDL_image.h>
-//#include <SDL_mixer.h>
 #include <iostream>
+#include <SDL_ttf.h>
+#include <SDL_mixer.h>
 
 class Game
 {
@@ -21,8 +22,7 @@ public:
     SDL_Texture* setPicture(const char* a);
     bool running();
     void gameover();
-
-    //void createScoreBoard();
+    void createScoreBoard(int score);
 
 private:
     int cnt = 0;
