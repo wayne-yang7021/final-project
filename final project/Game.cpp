@@ -13,14 +13,19 @@ SDL_Texture* over = NULL;
 SDL_Texture* cry = NULL;
 SDL_Texture* solidTexture = NULL;
 SDL_Texture* resta = NULL;
+//SDL_Texture* solidTexture = NULL;
 SDL_Rect a; 
 SDL_Rect restart; 
+SDL_Rect bigRestart;
 SDL_Rect b;
 SDL_Rect c;
-SDL_Rect scoreboard{ 400,0,200,70 };
+//SDL_Rect scoreboard{ 400,0,200,70 };
 SDL_Rect* boardrect;
+SDL_Rect scoreboard;
+SDL_Rect finalscore;
 int turn = 9;
 int m = 7;
+int score = 0;
 
 
 using namespace std;
@@ -64,35 +69,39 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 		}
 		isRunning = true;
 
-		const char* a1 = new char[100];
-		a1 = "startPage.png";
-		background = setPicture(a1);
+		const char* pic = new char[100];
+		pic = "startPage.png";
+		background = setPicture(pic);
 
 
-		a1 = "snowman.png";
-		snowman = setPicture(a1);
-		a1 = "startClick.png";
-		start = setPicture(a1);
-		a1 = "startOnclick.png";
-		startorg = setPicture(a1);
-		a1 = "gamePage.jpg";
-		background1 = setPicture(a1);
-		a1 = "board.jpg";
-		board = setPicture(a1);
-		a1 = "gameover.jpg";
-		over = setPicture(a1);
-		a1 = "cry.png";
-		cry = setPicture(a1);
-		a1 = "restart.png";
-		resta = setPicture(a1);
+		pic = "snowman.png";
+		snowman = setPicture(pic);
+		pic = "startClick.png";
+		start = setPicture(pic);
+		pic = "startOnclick.png";
+		startorg = setPicture(pic);
+		pic = "gamePage.jpg";
+		background1 = setPicture(pic);
+		pic = "board.jpg";
+		board = setPicture(pic);
+		pic = "gameover.jpg";
+		over = setPicture(pic);
+		pic = "cry.png";
+		cry = setPicture(pic);
+		pic = "restart.png";
+		resta = setPicture(pic);
 		//a1 = ""
 		a = { 0, 480, 100, 150 };
 		restart = { 300, 500, 200, 80 };
+		bigRestart = { 295, 495, 210 , 90 };
 		b = { 60,80,200,200 };
 		c = { 55,75,210,210 };
+		finalscore = { 200,200,200,100 };
+		scoreboard = { 450,30,100,50 };
 		boardrect = new SDL_Rect[10];
 		turn = 9; 
 		m = 7;
+		score = 0;
 
 		SDL_RenderCopy(renderer, background, NULL, NULL);
 		SDL_RenderCopy(renderer, start, NULL, NULL);
@@ -122,6 +131,29 @@ SDL_Texture* Game::setPicture(const char* a)
 
 	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, imageSurface);
 	return texture;
+}
+
+void Game::createScoreBoard(int score)
+{
+	cout << score << endl;
+	TTF_Init();
+
+	TTF_Font* font = TTF_OpenFont("Ayumi-Normal.ttf", 120);
+
+	if (!font)
+	{
+		SDL_Log("font l	oad failed");
+	}
+
+	string a = "score: " + to_string(score);
+	const char* scorenum = a.c_str(); //é€™è£¡è¦ç®—åˆ†æ•¸
+	SDL_Surface* solidSurface = TTF_RenderUTF8_Solid(font, scorenum, { 0, 0, 0, 255 });
+	solidTexture = SDL_CreateTextureFromSurface(renderer, solidSurface);
+
+	SDL_FreeSurface(solidSurface);
+	TTF_CloseFont(font);
+	TTF_Quit();
+
 }
 
 void Game::handleEvents()
@@ -159,6 +191,7 @@ void Game::mouse()
 	{
 	flag1:
 
+		createScoreBoard(score);
 		int x = 0, y = 0;
 		for (int i = 1; i <= 20; i++)
 		{
@@ -180,6 +213,7 @@ void Game::mouse()
 				{
 					SDL_RenderCopy(renderer, board, NULL, &boardrect[k]);
 				}
+				SDL_RenderCopy(renderer, solidTexture, NULL, &scoreboard);
 				SDL_RenderCopy(renderer, snowman, NULL, &a);
 
 				SDL_RenderPresent(renderer);
@@ -207,6 +241,7 @@ void Game::mouse()
 
 				if (a.x + 50 < boardrect[m].x + 100 && a.x + 50 > boardrect[m].x && abs(a.y + 100 - boardrect[m].y) <= 5)
 				{
+					score += 2;
 					//cout << a.y << endl;
 					for (int l = 0; l < 70; l++)
 					{
@@ -264,7 +299,7 @@ void Game::mouse()
 						{
 							SDL_RenderCopy(renderer, board, NULL, &boardrect[k]);
 						}
-
+						SDL_RenderCopy(renderer, solidTexture, NULL, &scoreboard);
 						SDL_RenderCopy(renderer, cry, NULL, &a);
 						//createScoreBoard();
 						//SDL_RenderCopy(renderer, solidTexture, NULL, &scoreboard);
@@ -358,7 +393,8 @@ void Game::gameover()
 		if (SDL_PointInRect(&mousedirect, &restart))
 		{
 			SDL_RenderCopy(renderer, over, NULL, NULL);
-			SDL_RenderCopy(renderer, resta, NULL, &restart);
+			SDL_RenderCopy(renderer, solidTexture, NULL, &finalscore);
+			SDL_RenderCopy(renderer, resta, NULL, &bigRestart);
 			render();
 			if (event.type == SDL_MOUSEBUTTONDOWN)
 			{
@@ -368,6 +404,7 @@ void Game::gameover()
 		else
 		{
 			SDL_RenderCopy(renderer, over, NULL, NULL);
+			SDL_RenderCopy(renderer, solidTexture, NULL, &finalscore);
 			SDL_RenderCopy(renderer, resta, NULL, &restart);
 			render();
 		}
@@ -390,7 +427,7 @@ void Game::render()
 	SDL_RenderPresent(renderer);
 	SDL_RenderClear(renderer);
 }
-/*void Open_Audio()//¥´¶}­µÀWÅX°Ê  ³]¸m¤ñ¯S²v ©M ±Ä¼Ë²v¡A 
+/*void Open_Audio()//æ‰“é–‹éŸ³é »é©…å‹•  è¨­ç½®æ¯”ç‰¹çŽ‡ å’Œ æŽ¡æ¨£çŽ‡ï¼Œ 
 {
 	int audio_rate = 22050;
 	Uint16 audio_format = MIX_DEFAULT_FORMAT;
@@ -403,8 +440,8 @@ void Game::render()
 	}
 }*/
 
-/*Mix_Music* Load_Musci(char* filename)//¥[¸ü­µ¼Ö filename¬O­µ¼Öªºµ´¹ï¸ô®|
-//¦Ü©ó¤ä«ù¤°»ò®æ¦¡»P¸Ñ½X®w¦³Ãö«Y¡Clibmad ´X¥G¤ä«ù©Ò¦³ªº±`¨£®æ¦¡ 
+/*Mix_Music* Load_Musci(char* filename)//åŠ è¼‰éŸ³æ¨‚ filenameæ˜¯éŸ³æ¨‚çš„çµ•å°è·¯å¾‘
+//è‡³æ–¼æ”¯æŒä»€éº¼æ ¼å¼èˆ‡è§£ç¢¼åº«æœ‰é—œä¿‚ã€‚libmad å¹¾ä¹Žæ”¯æŒæ‰€æœ‰çš„å¸¸è¦‹æ ¼å¼ 
 {
 	Mix_Music* music = NULL;
 	music = Mix_LoadMUS(");
@@ -435,7 +472,7 @@ void Game::clean()
 	{
 		printf( "Failed to load prompt texture!\n" );
 		success = false;
-	}*/  //³o¸Ì¦³¤@­Ó±Ò°Ê­µ®Äªº«ö¶s¹Ï¤ù¤§Ãþªº
+	}*/  //é€™è£¡æœ‰ä¸€å€‹å•Ÿå‹•éŸ³æ•ˆçš„æŒ‰éˆ•åœ–ç‰‡ä¹‹é¡žçš„
 
 	//Load music
 	/*gMusic = Mix_LoadMUS("background.mp3");
@@ -446,21 +483,21 @@ void Game::clean()
 	}*/
 
 	//Load sound effects
-	  //¦Y¨ì³·ªáªº­µ®Ä
+	  //åƒåˆ°é›ªèŠ±çš„éŸ³æ•ˆ
 	/*gEat = Mix_LoadWAV("21_sound_effects_and_music/scratch.wav");
 	if (gEat == NULL)
 	{
 		printf("Failed to load scratch sound effect! SDL_mixer Error: %s\n", Mix_GetError());
 		success = false;
 	}
-	//·Æ¹«ªº­µ®Ä
+	//æ»‘é¼ çš„éŸ³æ•ˆ
 	gClick = Mix_LoadWAV("21_sound_effects_and_music/high.wav");
 	if (gClick == NULL)
 	{
 		printf("Failed to load high sound effect! SDL_mixer Error: %s\n", Mix_GetError());
 		success = false;
 	}
-	//¦Y¨ì©ä§ú¿}ªº­µ®Ä
+	//åƒåˆ°æ‹æ–ç³–çš„éŸ³æ•ˆ
 	gFly = Mix_LoadWAV("21_sound_effects_and_music/medium.wav");
 	if (gFly == NULL)
 	{
@@ -507,7 +544,7 @@ void Game::clean()
 		/*switch (e.key.keysym.sym)
 		{
 			//Play high sound effect
-		case SDLK_1: //­n§ï±ø¥ó
+		case SDLK_1: //è¦æ”¹æ¢ä»¶
 			Mix_PlayChannel(-1, gEat, 0);
 			break;
 
